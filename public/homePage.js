@@ -11,28 +11,27 @@ logoutBtn.action = () => {
     });
 }
 
-//Получение информации о пользователе //Не отображает имя и ID
+//Получение информации о пользователе 
 
 ApiConnector.current((response) => {
     if (response.success === true) {
-        ProfileWidget.showProfile(data); //в который передавайте данные ответа от сервера. 
-        //?? Как правильно передать эти данные ?
+        ProfileWidget.showProfile(response.data);
     }
 });
 
 //Получение текущих курсов валюты //Не работает, таблица не появляется
+
 const ratesBoard = new RatesBoard();
 
-getStocks = () => { //Не понятно какую именно функцию создать
-    ApiConnector.getStocks((response) => {
-        if (response.success === true) {
-            tableBody.clearTable();
-        };
-        tableBody.fillTable(data);
-    })
-}
+//?? Не понятно какую именно функцию создать(название).
+ApiConnector.getStocks((response) => {
+    if (response.success === true) {
+        tableBody.clearTable();
+    };
+    tableBody.fillTable(response.data);
+})
 
-setIntarval(ratesBoard.getStocks(), 1000);
+setIntarval(ApiConnector.getStocks(), 1000); //Выдает ошибку. Почему интервал не может быть найден?
 
 //Операции с деньгами
 
@@ -42,7 +41,7 @@ moneyManager.addMoneyCallback = () => {
     ApiConnector.addMoney({ currency, amount }, response => {
         //Используйте аргумент функции свойства addMoneyCallback для передачи данных data в запрос.??
         if (response.success === true) {
-            ApiConnector.showProfile();
+            ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(`Баланс успешно пополнен`);
         } else {
             moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
@@ -56,7 +55,7 @@ addMoneyForm.conversionMoneyCallback = () => {
     ApiConnector.convertMoney({ fromCurrency, targetCurrency, fromAmount }, response => {
         //Используйте аргумент функции свойства conversionMoneyCallback для передачи данных в запрос??
         if (response.success === true) {
-            ApiConnector.showProfile();
+            ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(`Конвертация валют прошла успешно`);
         } else {
             moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
@@ -69,7 +68,7 @@ addMoneyForm.sendMoneyCallback = () => {
     ApiConnector.transferMoney({ to, currency, amount }, response => {
         //Используйте аргумент функции свойства sendMoneyCallback для передачи данных в запрос.??
         if (response.success === true) {
-            ApiConnector.showProfile();
+            ProfileWidget.showProfile(response.data);
             moneyManager.setMessage(`Перевод валют прошел успешно`);
         } else {
             moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
@@ -79,6 +78,7 @@ addMoneyForm.sendMoneyCallback = () => {
 
 
 //Работа с избранным
+
 //1
 
 const favoritesWidget = new FavoritesWidget(); //Создайте объект типа FavoritesWidget+
@@ -89,7 +89,7 @@ ApiConnector.getFavorites((response) => {
     if (response.success === true) {
         favoritesTableBody.clearTable();
         favoritesTableBody.fillTable(data);
-        updateUsersList(data);
+        moneyManager.updateUsersList(response.data);
     }
 })
 
@@ -101,7 +101,7 @@ favoritesWidget.addUserCallback = () => {
         if (response.success === true) {
             favoritesTableBody.clearTable();
             favoritesTableBody.fillTable(data);
-            updateUsersList(data);
+            moneyManager.updateUsersList(response.data);
             favoritesMessageBox.setMessage(`Пользователь успешно добавлен!`)
         } else {
             favoritesMessageBox.setMessage(`Произошла ошибка: ${response.error}`)
@@ -117,7 +117,7 @@ favoritesWidget.removeUserCallback = () => {
         if (response.success === true) {
             favoritesTableBody.clearTable();
             favoritesTableBody.fillTable(data);
-            updateUsersList(data);
+            moneyManager.updateUsersList(response.data);
             favoritesMessageBox.setMessage(`Пользователь успешно удален!`)
         } else {
             favoritesMessageBox.setMessage(`Произошла ошибка: ${response.error}`)
