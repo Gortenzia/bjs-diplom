@@ -19,32 +19,31 @@ ApiConnector.current((response) => {
     }
 });
 
-//Получение текущих курсов валюты //Не работает, таблица не появляется
+//Получение текущих курсов валюты //+
 
 const ratesBoard = new RatesBoard();
+let getStocks = () => {
+    ApiConnector.getStocks((response) => {
+        if (!response.success) return
+        ratesBoard.clearTable()
+        ratesBoard.fillTable(response.data)
+    })
+}
+setInterval(getStocks, 1000);
 
-//?? Не понятно какую именно функцию создать(название).
-ApiConnector.getStocks((response) => {
-    if (response.success === true) {
-        tableBody.clearTable();
-    };
-    tableBody.fillTable(response.data);
-})
-
-setIntarval(ApiConnector.getStocks(), 1000); //Выдает ошибку. Почему интервал не может быть найден?
-
-//Операции с деньгами
+//Операции с деньгами //Пока не отображаются пополнения
 
 const moneyManager = new MoneyManager();
 
 moneyManager.addMoneyCallback = () => {
     ApiConnector.addMoney({ currency, amount }, response => {
-        //Используйте аргумент функции свойства addMoneyCallback для передачи данных data в запрос.??
-        if (response.success === true) {
-            ProfileWidget.showProfile(response.data);
-            moneyManager.setMessage(`Баланс успешно пополнен`);
+        if (!response.success) {
+            addMoneyForm.showProfile(response.data);
+            //В случае успешного запроса отобразите в профиле 
+            //новые данные о пользователе из данных ответа от сервера(showProfile).-
+            errorMessageBlock.setMessage(`Баланс успешно пополнен`);
         } else {
-            moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
+            errorMessageBlock.setMessage(`Произошла ошибка: ${response.error}`);
         }
     })
 }
@@ -53,12 +52,11 @@ moneyManager.addMoneyCallback = () => {
 
 addMoneyForm.conversionMoneyCallback = () => {
     ApiConnector.convertMoney({ fromCurrency, targetCurrency, fromAmount }, response => {
-        //Используйте аргумент функции свойства conversionMoneyCallback для передачи данных в запрос??
-        if (response.success === true) {
+        if (!response.success) {
             ProfileWidget.showProfile(response.data);
-            moneyManager.setMessage(`Конвертация валют прошла успешно`);
+            errorMessageBlock.setMessage(`Конвертация валют прошла успешно`);
         } else {
-            moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
+            errorMessageBlock.setMessage(`Произошла ошибка: ${response.error}`);
         }
     })
 }
@@ -66,12 +64,11 @@ addMoneyForm.conversionMoneyCallback = () => {
 //перевод валюты
 addMoneyForm.sendMoneyCallback = () => {
     ApiConnector.transferMoney({ to, currency, amount }, response => {
-        //Используйте аргумент функции свойства sendMoneyCallback для передачи данных в запрос.??
-        if (response.success === true) {
+        if (!response.success) {
             ProfileWidget.showProfile(response.data);
-            moneyManager.setMessage(`Перевод валют прошел успешно`);
+            errorMessageBlock.setMessage(`Перевод валют прошел успешно`);
         } else {
-            moneyManager.setMessage(`Произошла ошибка: ${response.error}`);
+            errorMessageBlock.setMessage(`Произошла ошибка: ${response.error}`);
         }
     })
 }
@@ -97,8 +94,7 @@ ApiConnector.getFavorites((response) => {
 
 favoritesWidget.addUserCallback = () => {
     ApiConnector.addUserToFavorites({ id, name }, response => {
-        //Используйте аргумент функции свойства addUserCallback для передачи данных пользователя в запрос. ??
-        if (response.success === true) {
+        if (!response.success) {
             favoritesTableBody.clearTable();
             favoritesTableBody.fillTable(data);
             moneyManager.updateUsersList(response.data);
@@ -113,8 +109,7 @@ favoritesWidget.addUserCallback = () => {
 
 favoritesWidget.removeUserCallback = () => {
     ApiConnector.removeUserFromFavorites(id, response => {
-        //Используйте аргумент функции свойства removeUserCallback для передачи данных пользователя в запрос.??
-        if (response.success === true) {
+        if (!response.success) {
             favoritesTableBody.clearTable();
             favoritesTableBody.fillTable(data);
             moneyManager.updateUsersList(response.data);
